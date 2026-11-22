@@ -26,9 +26,9 @@ and each step is a guard that refuses a bad change before it is public.
 | Setting | Value |
 | --- | --- |
 | Main branch | ruleset: pull request required (no approval count, a sole maintainer cannot approve his own), required checks, no force-push, no deletion, linear history |
-| Bypass of the ruleset | repository administrator role only (the maintainer), for emergencies and for fork pull requests whose `denylist` check cannot run |
+| Bypass of the ruleset | repository administrator role only (the maintainer), in pull-request mode: he may merge a pull request whose `denylist` check cannot run (a fork's), but never push to `main` directly |
 | Collaborators | none besides the maintainer; outside contributors use a fork and a pull request |
-| Actions | default `GITHUB_TOKEN` read-only, workflows cannot approve pull requests, workflows from outside contributors need the maintainer's approval, only actions from GitHub and verified creators |
+| Actions | default `GITHUB_TOKEN` read-only, workflows cannot approve pull requests, workflows from outside contributors need the maintainer's approval, only actions owned by GitHub plus `astral-sh/setup-uv` are allowed |
 | Secret scanning and push protection | enabled |
 | Dependabot alerts and security updates | enabled |
 | Private vulnerability reporting | enabled (see `SECURITY.md`) |
