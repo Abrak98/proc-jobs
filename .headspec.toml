@@ -1,0 +1,69 @@
+[headspec]
+# Every key `headspec` recognises, at its code default. Delete the ones you do not
+# change — the loader fills any omitted key from the same defaults — or keep them all
+# for a self-documenting config.
+
+# --- Header gate (headspec-spec-header), the priority-#1 rule ------------------------
+# Dirs where every .py MUST declare a spec header. Matched as path prefixes, so
+# nested roots like "src/app" work.
+src_roots = ["src"]
+# Dirs exempt from the mandatory rule (a present header is still validated).
+specless_dirs = ["scripts", "tests", "hooks", "notebooks", "tmp", "migrations"]
+specs_dir = "specs"
+# Canonical first; legacy ".technical.md" accepted for backward compatibility.
+spec_suffixes = [".spec.md", ".technical.md"]
+# Source extensions the gate covers.
+gated_extensions = [".py"]
+# "strict" (fail on any violation) | "ratchet" (fail only on non-baselined) | "report".
+enforcement = "strict"
+baseline_file = ".headspec-baseline.txt"
+
+# --- Naming gate (headspec-name-check) -----------------------------------------------
+# A retired alias must never reappear. Independent enforcement so a legacy repo can
+# adopt the header gate first and ratchet names second.
+name_enforcement = "strict"
+name_baseline_file = ".headspec-name-baseline.txt"
+# Dirs under src_roots the forbidden-alias scan skips (vendored / generated trees).
+vendored_dirs = []
+
+# --- Spec-quality lints (headspec-spec-lint, advisory) -------------------------------
+# 0 disables a check.
+spec_max_kb = 40
+spec_fanin_max = 12
+
+# --- Config coverage (headspec-env-coverage) -----------------------------------------
+# The committed example every literal env key read under src_roots must appear in.
+env_example = ".env.example"
+# Keys SET by your own code / internal handoffs, exempt from the example.
+env_internal_vars = []
+
+# --- Module-boundary gate (headspec-interface-check) ---------------------------------
+# Types that must never cross a sealed module's public surface (e.g. ["DataFrame",
+# "ndarray"]). Empty = the seal is checked, the leak rule is not.
+interface_banned_types = []
+# Roots whose imports are checked against the seal. Empty = every src_root.
+interface_consumer_roots = []
+
+# --- Work board (headspec-board) -----------------------------------------------------
+board_path = "BOARD.md"
+board_claims_dir = ".claude/state/board_claims"
+
+# --- Import-graph test-impact selection (headspec-impacted) --------------------------
+# Where tests live + the opt-in flag (off = full suite / CI parity; on = the
+# reverse-reachability subset).
+test_roots = ["tests"]
+test_impact_enabled = false
+
+# --- Observability gate (headspec-telemetry-check) -----------------------------------
+# The ONE module allowed to construct loggers. Empty disables that check.
+logger_module = ""
+# Where run telemetry is stored; must be gitignored and untracked. Empty disables.
+telemetry_dir = ""
+# Retention bound in days for telemetry_dir. 0 with an empty telemetry_dir = off.
+telemetry_retention_days = 0
+# A literal EXPLAIN must request this plan format.
+telemetry_plan_format = "json"
+
+[tool_mode]
+# Keeps the gate set this repository pinned before the move to the installed tool.
+disable = ["headspec-complexity", "headspec-complexity-annotate", "headspec-spec-index", "headspec-spec-cochange", "headspec-plan-check", "headspec-impacted-push", "headspec-reviewed", "headspec-schedule"]

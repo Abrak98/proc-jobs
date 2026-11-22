@@ -1,0 +1,50 @@
+# Keeps the public repository clean: a secret scan and a deny-list scan over the WHOLE history on
+# every push and pull request. Both fail closed. The deny list (words that must never appear:
+# an employer's names, private paths, colleagues' names) is not in the repository: it is the
+# encrypted Actions secret DENYLIST, and the log shows only where a finding is, never the word.
+#
+# A pull request from a fork gets no secrets, so the deny-list job fails there by design: such a
+# request is merged only by the maintainer, after the same scan runs on his machine in the
+# pre-push hook.
+name: public-guard
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks over the full history
+        run: |
+          set -euo pipefail
+          version=8.30.1
+          archive="gitleaks_${version}_linux_x64.tar.gz"
+          curl -sSfL -o "$archive" "https://github.com/gitleaks/gitleaks/releases/download/v${version}/${archive}"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  ${archive}" | sha256sum -c -
+          tar -xzf "$archive" gitleaks
+          ./gitleaks detect --source . --redact --no-banner --exit-code 1
+
+  denylist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: deny-list scan over the full history
+        env:
+          DENYLIST: ${{ secrets.DENYLIST }}
+        run: |
+          if [ -z "${DENYLIST}" ]; then
+            echo "::error::the DENYLIST secret is not available (a fork's pull request gets none); failing closed"
+            exit 1
+          fi
+          python3 -I scripts/denylist_check.py --denylist-env DENYLIST --mask --all-history

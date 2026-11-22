@@ -1,0 +1,54 @@
+[project]
+name = "proc-lib"
+version = "0.1.0"
+description = "Managed background-process CLI (`proc`). Launch long-running processes detached, monitor, fetch logs, wait, and kill them — registry-backed, logged, PID-reuse-guarded — so an autonomous agent never hangs on a foreground command or an interactive kill. stdlib-only by design."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Abrak98", email = "144574389+Abrak98@users.noreply.github.com" }]
+requires-python = ">=3.12"
+classifiers = [
+    "Operating System :: POSIX :: Linux",
+]
+# stdlib-only at runtime, by design: a process supervisor must not depend on
+# anything that could itself break the very runs it manages.
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    # Exactly the ruff-pre-commit rev in .pre-commit-config.yaml:
+    # every ruff release moves rule behaviour and formatter output, so a floor lets a hand
+    # run and the gate be two different linters. Bump all three together.
+    "ruff==0.16.9",
+]
+
+[project.scripts]
+proc = "proc_lib.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Abrak98/proc-supervisor"
+Repository = "https://github.com/Abrak98/proc-supervisor"
+Issues = "https://github.com/Abrak98/proc-supervisor/issues"
+
+[build-system]
+requires = ["uv_build>=0.12.19,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# uv_build ships every file under src/proc_lib/ except __pycache__, unlike the setuptools
+# backend it replaced, which shipped the .py modules alone. A tool cache left in the package
+# directory by a lint run launched from there would otherwise land in the wheel.
+source-exclude = [".mypy_cache", ".pytest_cache", ".ruff_cache"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers"
+pythonpath = ["src"]

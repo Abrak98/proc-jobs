@@ -1,0 +1,104 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: a56c0b927e6465d37cae3e97d35d4d18ab2b96cd  # frozen: v0.16.9
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 02808f45d038526bfcceebcbf6421c1047997ff9  # frozen: v8.18.4
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: uv run --locked pytest -q
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+  # >>> headspec tool mode — written by `headspec sync`, removed by `headspec uninstall`; configure it in .headspec.toml [tool_mode], not here >>>
+  # headspec:created: specs/SPEC_INDEX.md
+  - repo: local
+    hooks:
+    - id: headspec
+      name: headspec gates (pre-commit; skipped where the headspec tool is not installed)
+      entry: sh -c 'command -v headspec >/dev/null 2>&1 || { echo "headspec is not installed on this machine, so the headspec gates did not run (expected unless you work with headspec)"; exit 0; }; exec headspec hook "$0" "$@"' pre-commit
+      language: system
+      pass_filenames: false
+      always_run: true
+      verbose: true
+      stages: [pre-commit]
+    - id: headspec-prepare-commit-msg
+      name: headspec gates (prepare-commit-msg; skipped where the headspec tool is not installed)
+      entry: sh -c 'command -v headspec >/dev/null 2>&1 || exit 0; exec headspec hook "$0" "$@"' prepare-commit-msg
+      language: system
+      stages: [prepare-commit-msg]
+    - id: headspec-commit-msg
+      name: headspec gates (commit-msg; skipped where the headspec tool is not installed)
+      entry: sh -c 'command -v headspec >/dev/null 2>&1 || exit 0; exec headspec hook "$0" "$@"' commit-msg
+      language: system
+      stages: [commit-msg]
+    - id: headspec-pre-push
+      name: headspec gates (pre-push; skipped where the headspec tool is not installed)
+      entry: sh -c 'command -v headspec >/dev/null 2>&1 || exit 0; exec headspec hook "$0" "$@"' pre-push
+      language: system
+      pass_filenames: false
+      always_run: true
+      stages: [pre-push]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: a66e98df7b4aeeb3724184b332785976d062b92e  # frozen: v1.19.1
+    hooks:
+      - id: mypy
+        args: [--ignore-missing-imports, --follow-imports=silent, --disable-error-code=import-untyped]
+        stages: [pre-commit]
+  - repo: https://github.com/PyCQA/bandit
+    rev: 92ae8b82fb422a639f0ed8d99e96cea769594e08  # frozen: 1.9.4
+    hooks:
+      - id: bandit
+        args: [--severity-level, medium, --quiet]
+        exclude: ^tests?/
+        stages: [pre-commit]
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: 745eface02aef23e168a8afb6b5737818efbea95  # frozen: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        stages: [pre-commit]
+  - repo: https://github.com/codespell-project/codespell
+    rev: 57b21406f092110c18776e39b0bda50d37c945c8  # frozen: v2.4.3
+    hooks:
+      - id: codespell
+        stages: [pre-commit]
+  - repo: https://github.com/adrienverge/yamllint
+    rev: cba56bcde1fdd01c1deb3f945e69764c291a6530  # frozen: v1.38.0
+    hooks:
+      - id: yamllint
+        args: [-d, relaxed]
+        stages: [pre-commit]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
+    hooks:
+      - id: check-toml
+        stages: [pre-commit]
+      - id: check-json
+        stages: [pre-commit]
+      - id: detect-private-key
+        stages: [pre-commit]
+      - id: check-merge-conflict
+        stages: [pre-commit]
+      - id: check-case-conflict
+        stages: [pre-commit]
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e  # frozen: v8.30.1
+    hooks:
+      - id: gitleaks
+        stages: [pre-commit]
+  # <<< headspec tool mode <<<

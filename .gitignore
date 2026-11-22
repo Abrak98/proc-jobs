@@ -1,0 +1,28 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+.venv/
+.env
+
+# --- headspec: secret patterns required by headspec-env-coverage ---
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+*_credentials.json
+secrets/
+
+# --- pipeline scratch state (not source, not spec-owned) ---
+logs/
+tasks/
+.todo.lock
+
+# --- Claude Code session state (per-session, not project source) ---
+.claude/state/

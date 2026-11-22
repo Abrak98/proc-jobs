@@ -1,0 +1,62 @@
+# The gates, run somewhere other than the author's workstation.
+#
+# Everything this repo enforces has until now run only as a local pre-commit hook, which
+# means a clone that never ran `pre-commit install` is ungated and nothing says so. Two
+# jobs, each answering a question the local hooks structurally cannot:
+#
+#   gates    — do the checks pass on a machine that has only what uv.lock pins?
+#              A `language: system` hook (pytest) runs against whatever the workstation
+#              happens to have installed, so a missing declared dependency is invisible there.
+#   floor    — do the tests pass on every interpreter the package claims?
+#              `requires-python = ">=3.12"` is a promise made to whoever installs the wheel.
+#
+# The pre-push tier runs here too, since a hook wired to `pre-push` fires only when someone
+# pushes.
+name: gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          version: "0.12.19"
+          python-version: "3.12"
+      - run: uv sync --locked
+      - run: uv tool install pre-commit
+      # The headspec gates are an installed tool, not a pre-commit repo: a runner without it
+      # passes those hooks with a notice, so the one config serves local and CI.
+      - run: pre-commit run --all-files --show-diff-on-failure
+      # pre-push-stage hooks read their diff range from PRE_COMMIT_FROM_REF /
+      # PRE_COMMIT_TO_REF, which pre-commit only exports when git actually drives the push.
+      - run: pre-commit run --all-files --hook-stage pre-push --show-diff-on-failure
+        env:
+          PRE_COMMIT_FROM_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+          PRE_COMMIT_TO_REF: ${{ github.event.pull_request.head.sha || github.sha }}
+
+  floor:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          version: "0.12.19"
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync --locked
+      - run: uv run pytest -q
