@@ -229,6 +229,9 @@ def test_exited_since_answers_the_window_from_the_live_folder_and_the_days_it_co
     seed("ancient", T0 - 9 * DAY)
     seed("flat-recent", T0 - 1800, live=True)  # ended, not yet swept: in the window
     seed("old-live", T0 - 6 * DAY, live=True)  # outside the window: skipped by file age
+    # The seeded records have no index yet; building it is the one full scan (Path.glob goes
+    # through os.scandir on Python 3.12), so it runs before the spy and only the listing is watched.
+    core._live_index()
     scanned: list[str] = []
     real = os.scandir
 
