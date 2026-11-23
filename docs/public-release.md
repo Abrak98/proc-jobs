@@ -1,7 +1,7 @@
 # Public release: how a change reaches the public repository
 
 The maintained tree lives in a private repository. The public repository,
-`Abrak98/proc-supervisor`, holds the same tree as a separate history that starts from one clean
+`Abrak98/proc-jobs`, holds the same tree as a separate history that starts from one clean
 commit; the private history is never pushed to it. Every later change travels the one path below,
 and each step is a guard that refuses a bad change before it is public.
 
@@ -39,6 +39,6 @@ and each step is a guard that refuses a bad change before it is public.
 
 - The deny list is a file outside every repository (the encrypted `DENYLIST` secret on GitHub is a
   copy of it). A word is added to the file and to the secret together; the secret is replaced with
-  `gh secret set DENYLIST --repo Abrak98/proc-supervisor < <file>`.
+  `gh secret set DENYLIST --repo Abrak98/proc-jobs < <file>`.
 - No guard has a skip flag. A false match is fixed by narrowing the entry in the deny list.
 - The hook guards only pushes to the public remote; pushes to the private repository are not scanned.

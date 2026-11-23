@@ -10,7 +10,7 @@
 # then has to pass the required checks (see docs/public-release.md).
 set -euo pipefail
 
-public_repo="Abrak98/proc-supervisor"
+public_repo="Abrak98/proc-jobs"
 author_name="Abrak98"
 author_email="144574389+Abrak98@users.noreply.github.com"
 

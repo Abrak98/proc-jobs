@@ -77,7 +77,7 @@ and without ever risking a signal reaching a PID that isn't actually the job it 
   with nothing to do reads under 1 MB (interpreter included) and takes no lock; the pass
   writes its cost line (`cost.spec.md`). The timer's `proc launch-due` skips argparse
   (`cli.main` fast path) and the engine imports `subprocess`, `shutil`, `launcher`,
-  `claude_hook` and `heavy_job_lock` only where used, because bytecode read at start is most
+  `claude_hook`, `hook_judge` and `heavy_job_lock` only where used, because bytecode read at start is most
   of such a pass's reads.
 - **A launched job runs in its own systemd scope.** When the launcher's unit starts a job
   (`INVOCATION_ID` set, `systemd-run` present) the wrapper is exec'd by `systemd-run --user
@@ -370,8 +370,10 @@ by an older version (no `env`) is listed, reconciled, waited on and killed uncha
 ## Dependencies
 - `proc_lib.launcher` (`specs/proc_lib/launcher.spec.md`) — install/check of the per-minute
   launcher, called before any scheduling.
-- `proc_lib.claude_hook` (`specs/proc_lib/claude_hook.spec.md`) — the Claude Code hook and its
-  settings editing, called by `cmd_hook` and `cmd_start`.
+- `proc_lib.claude_hook` (`specs/proc_lib/claude_hook.spec.md`) — the Claude Code hook itself
+  (`main`), run by `cmd_hook unwrap`; `proc_lib.hook_judge` (same spec) — its settings editing
+  (`install`, `uninstall`, `status`, `ensure`, `settings_path`, `default_config_dirs`), called
+  by `cmd_hook` and `cmd_start` through its exported names.
 - `proc_lib.heavy_job_lock` (`specs/proc_lib/heavy_job_lock.spec.md`) — optional RAM-exclusivity
   check/claim invoked from `cmd_start` when `args.heavy` is set.
 - `proc_lib.cost` (`specs/proc_lib/cost.spec.md`) — the cost line and alert of a launch pass.
@@ -389,7 +391,7 @@ by an older version (no `env`) is listed, reconciled, waited on and killed uncha
 - `cmd_hook(args) -> int` — `status` / `install` / `uninstall` of the Claude Code hook in each
   `--config-dir` (default `$CLAUDE_CONFIG_DIR`, else `~/.claude`), `unwrap` runs the hook
   (`proc_lib.claude_hook`, `specs/proc_lib/claude_hook.spec.md`); `status`/`install` exit
-  `EXIT_HOOK_MISSING` (7) when an entry is missing. `cmd_start` calls `claude_hook.ensure`
+  `EXIT_HOOK_MISSING` (7) when an entry is missing. `cmd_start` calls `hook_judge.ensure`
   before launching and prints its one-line note to stderr; it never fails a start.
 - `cmd_launcher(args) -> int` — `status` / `install` / `uninstall` of the launcher backend;
   `status` exits `EXIT_LAUNCHER` when it cannot fire jobs.

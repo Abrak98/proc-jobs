@@ -27,9 +27,9 @@ dev = [
 proc = "proc_lib.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Abrak98/proc-supervisor"
-Repository = "https://github.com/Abrak98/proc-supervisor"
-Issues = "https://github.com/Abrak98/proc-supervisor/issues"
+Homepage = "https://github.com/Abrak98/proc-jobs"
+Repository = "https://github.com/Abrak98/proc-jobs"
+Issues = "https://github.com/Abrak98/proc-jobs/issues"
 
 [build-system]
 requires = ["uv_build>=0.12.19,<0.13.0"]

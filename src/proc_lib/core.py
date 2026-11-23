@@ -16,7 +16,7 @@ Exit codes:
 
 stdlib-only by design: a process supervisor must not depend on anything that
 could itself break the very runs it manages. Modules only some commands need
-(subprocess, shutil, launcher, claude_hook, heavy_job_lock) are imported inside the
+(subprocess, shutil, launcher, claude_hook, hook_judge, heavy_job_lock) are imported inside the
 functions that use them: the minute-by-minute `launch-due` pass reads their bytecode
 only when it actually starts a job.
 """
@@ -1388,9 +1388,9 @@ def _ensure_launcher() -> bool:
 
 
 def _ensure_claude_hook() -> None:
-    from proc_lib import claude_hook
+    from proc_lib import hook_judge
 
-    note = claude_hook.ensure(BASE)
+    note = hook_judge.ensure(BASE)
     if note:
         print(note, file=sys.stderr)
 
@@ -1694,22 +1694,22 @@ def cmd_launcher(args) -> int:
 
 def cmd_hook(args) -> int:
     """install / uninstall / status of the Claude Code hook, or `unwrap` (the hook itself)."""
-    from proc_lib import claude_hook
+    from proc_lib import claude_hook, hook_judge
 
     if args.action == "unwrap":
         return claude_hook.main()
-    dirs = [Path(d) for d in args.config_dir] or claude_hook.default_config_dirs()
+    dirs = [Path(d) for d in args.config_dir] or hook_judge.default_config_dirs()
     code = 0
     for d in dirs:
         try:
             if args.action == "install":
-                st = claude_hook.install(d, BASE)
+                st = hook_judge.install(d, BASE)
             elif args.action == "uninstall":
-                st = claude_hook.uninstall(d, BASE)
+                st = hook_judge.uninstall(d, BASE)
             else:
-                st = claude_hook.status(d)
+                st = hook_judge.status(d)
         except (OSError, ValueError) as e:
-            _err(f"{claude_hook.settings_path(d)}: {e}")
+            _err(f"{hook_judge.settings_path(d)}: {e}")
             return EXIT_USAGE
         print(st.line())
         if args.action != "uninstall" and not st.installed:
