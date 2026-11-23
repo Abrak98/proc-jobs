@@ -7,10 +7,10 @@ import argparse
 
 import pytest
 
-from proc_lib import claude_hook, core, launcher
+from proc_lib import core, hook_judge, launcher
 
 REAL_ENSURE = launcher.ensure  # captured before any test stubs it
-REAL_ENSURE_HOOK = claude_hook.ensure
+REAL_ENSURE_HOOK = hook_judge.ensure
 
 
 @pytest.fixture(autouse=True)
@@ -36,7 +36,7 @@ def stub_launcher(monkeypatch):
 def stub_claude_hook(monkeypatch):
     """`start` registers the Claude Code hook in the user's settings; no test may touch
     the real ones."""
-    monkeypatch.setattr(claude_hook, "ensure", lambda base, env=None: None)
+    monkeypatch.setattr(hook_judge, "ensure", lambda base, env=None: None)
 
 
 @pytest.fixture(autouse=True)

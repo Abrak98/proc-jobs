@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from proc_lib import claude_hook, cli, core
+from proc_lib import claude_hook, cli, core, hook_judge
 
 from .conftest import REAL_ENSURE_HOOK, ns
 
@@ -627,7 +627,7 @@ def test_ensure_never_raises_on_a_broken_settings_file(tmp_path):
 
 
 def test_start_runs_ensure_and_reports_an_install(monkeypatch, capsys):
-    monkeypatch.setattr(claude_hook, "ensure", lambda base, env=None: "proc: installed its hook")
+    monkeypatch.setattr(hook_judge, "ensure", lambda base, env=None: "proc: installed its hook")
     assert (
         core.cmd_start(ns(name="j", timeout=None, cwd="/tmp", env=[], at=None, cmd=["--", "true"]))
         == 0

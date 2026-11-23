@@ -3,8 +3,8 @@
 ## Setup
 
 ```bash
-git clone git@github.com:Abrak98/proc-supervisor.git
-cd proc-supervisor
+git clone git@github.com:Abrak98/proc-jobs.git
+cd proc-jobs
 uv sync
 ```
 
